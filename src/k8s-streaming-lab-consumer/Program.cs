@@ -1,4 +1,5 @@
 using Confluent.Kafka;
+using OpenSearch.Client;
 
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -14,6 +15,14 @@ builder.Services.AddSingleton<IConsumer<string, string>>(sp =>
         
     };
     return new ConsumerBuilder<string, string>(config).Build();
+});
+
+builder.Services.AddSingleton<IOpenSearchClient>(sp =>
+{
+    var url = builder.Configuration["OpenSearch:Url"]!;
+    var settings = new ConnectionSettings(new Uri(url))
+        .DefaultIndex(builder.Configuration["OpenSearch:IndexName"]);
+    return new OpenSearchClient(settings);
 });
 
 builder.Services.AddHostedService<Worker>();
