@@ -46,6 +46,44 @@ services:
     networks:
       - streaming-net
 
+  opensearch:
+    image: opensearchproject/opensearch:2.19.0
+    container_name: opensearch
+    environment:
+      - discovery.type=single-node
+      - plugins.security.disabled=true
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD}
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+    networks:
+      - streaming-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.19.0
+    container_name: opensearch-dashboards
+    environment:
+      - OPENSEARCH_HOSTS=["http://opensearch:9200"]
+      - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
+    ports:
+      - "5601:5601"
+    depends_on:
+      opensearch:
+        condition: service_healthy
+    networks:
+      - streaming-net      
+
   producer:
     build:
       context: .
@@ -68,8 +106,12 @@ services:
       - Kafka__BootstrapServers=redpanda:9092
       - Kafka__Topic=streaming-events
       - Kafka__GroupId=k8s-streaming-lab-consumer-group
+      - OpenSearch__Url=http://opensearch:9200
+      - OpenSearch__IndexName=events
     depends_on:
       redpanda:
+        condition: service_healthy
+      opensearch:
         condition: service_healthy
     networks:
       - streaming-net
