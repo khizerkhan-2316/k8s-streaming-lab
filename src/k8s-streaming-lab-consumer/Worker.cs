@@ -1,16 +1,49 @@
-namespace k8s_streaming_lab_consumer;
+using Confluent.Kafka;
 
-public class Worker(ILogger<Worker> logger) : BackgroundService
+public class Worker : BackgroundService
 {
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    private readonly ILogger<Worker> _logger;
+    private readonly IConsumer<string, string> _consumer;
+    private readonly IConfiguration _config;
+
+    public Worker(ILogger<Worker> logger, IConsumer<string, string> consumer, IConfiguration config)
     {
-        while (!stoppingToken.IsCancellationRequested)
+        _logger = logger;
+        _consumer = consumer;
+        _config = config;
+    }
+
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        var topic = _config["Kafka:Topic"];
+        _consumer.Subscribe(topic);
+
+        return Task.Run(() =>
         {
-            if (logger.IsEnabled(LogLevel.Information))
+            while (!stoppingToken.IsCancellationRequested)
             {
-                logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                try
+                {
+                    var result = _consumer.Consume(stoppingToken);
+                    _logger.LogInformation("Consumed message: Key={Key} Value={Value} Partition={Partition} Offset={Offset}",
+                        result.Message.Key, result.Message.Value, result.Partition, result.Offset);
+                }
+                catch (ConsumeException ex)
+                {
+                    _logger.LogError(ex, "Consume error: {Reason}", ex.Error.Reason);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
             }
-            await Task.Delay(1000, stoppingToken);
-        }
+        }, stoppingToken);
+    }
+
+    public override async Task StopAsync(CancellationToken cancellationToken)
+    {
+        _consumer.Close();
+        _consumer.Dispose();
+        await base.StopAsync(cancellationToken);
     }
 }

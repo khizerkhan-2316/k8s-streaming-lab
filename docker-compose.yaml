@@ -59,3 +59,17 @@ services:
         condition: service_healthy
     networks:
       - streaming-net
+  consumer:
+    build:
+      context: .
+      dockerfile: src/k8s-streaming-lab-consumer/Dockerfile
+    container_name: consumer
+    environment:
+      - Kafka__BootstrapServers=redpanda:9092
+      - Kafka__Topic=streaming-events
+      - Kafka__GroupId=k8s-streaming-lab-consumer-group
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    networks:
+      - streaming-net
