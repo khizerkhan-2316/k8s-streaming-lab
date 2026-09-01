@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/k8s-streaming-lab-consumer/k8s-streaming-lab-consumer.csproj" />
     <Project Path="src/k8s-streaming-lab-producer/k8s-streaming-lab-producer.csproj" />
   </Folder>
 </Solution>
