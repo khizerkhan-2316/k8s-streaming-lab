@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: redpanda-console
+  namespace: streaming-platform
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: redpanda-console
+
+  template:
+    metadata:
+      labels:
+        app: redpanda-console
+
+    spec:
+      containers:
+        - name: redpanda-console
+          image: docker.redpanda.com/redpandadata/console:v3.11.0
+
+          ports:
+            - containerPort: 8080
+              name: http
+
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 5
+            failureThreshold: 30
+
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 5
+            failureThreshold: 3
+
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+
+          env:
+            - name: KAFKA_BROKERS
+              value: redpanda-service:9092

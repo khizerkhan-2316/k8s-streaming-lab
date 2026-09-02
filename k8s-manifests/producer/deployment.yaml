@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: producer
+  namespace: streaming-platform
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: producer
+
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: producer
+
+    spec:
+      containers:
+        - name: producer
+          image: producer:latest
+
+          env:
+            - name: Kafka__BootstrapServers
+              value: redpanda-service:9092
