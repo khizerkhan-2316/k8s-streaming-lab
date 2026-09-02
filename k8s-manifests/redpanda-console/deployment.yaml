@@ -28,21 +28,21 @@ spec:
 
           startupProbe:
             httpGet:
-              path: /api/health
+              path: /health
               port: http
             periodSeconds: 5
             failureThreshold: 30
 
           readinessProbe:
             httpGet:
-              path: /api/health
+              path: /health
               port: http
             periodSeconds: 5
             failureThreshold: 3
 
           livenessProbe:
             httpGet:
-              path: /api/health
+              path: /health
               port: http
             periodSeconds: 10
             failureThreshold: 3

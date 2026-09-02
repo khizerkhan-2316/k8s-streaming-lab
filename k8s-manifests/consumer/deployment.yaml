@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: consumer
-          image: consumer:latest
+          image: consumer:v1.0.0
 
           env:
             - name: Kafka__BootstrapServers
@@ -29,8 +29,11 @@ spec:
             - name: Kafka__GroupId
               value: consumer-group
 
+            - name: Kafka__Topic
+              value: streaming-events
+
             - name: OpenSearch__Url
-              value: http://opensearch:9200
+              value: http://opensearch-service:9200
 
             - name: OpenSearch__IndexName
               value: messages

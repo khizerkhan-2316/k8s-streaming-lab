@@ -39,6 +39,12 @@ spec:
 
             - name: OPENSEARCH_JAVA_OPTS
               value: "-Xms512m -Xmx512m"
+            
+            - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: opensearch-admin-secret
+                  key: password
 
           startupProbe:
             httpGet:

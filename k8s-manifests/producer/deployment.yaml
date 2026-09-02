@@ -20,8 +20,11 @@ spec:
     spec:
       containers:
         - name: producer
-          image: producer:latest
+          image: producer:v1.0.0
 
           env:
             - name: Kafka__BootstrapServers
               value: redpanda-service:9092
+
+            - name: Kafka__Topic
+              value: streaming-events

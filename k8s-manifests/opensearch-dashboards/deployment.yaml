@@ -49,4 +49,6 @@ spec:
 
           env:
             - name: OPENSEARCH_HOSTS
-              value: '["http://opensearch:9200"]'
+              value: '["http://opensearch-service:9200"]'
+            - name: DISABLE_SECURITY_DASHBOARDS_PLUGIN
+              value: "true"
